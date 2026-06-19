@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lakshmi Textile — Project Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════ */
+/*  PRESENTATION ENGINE STYLES                     */
+/* ═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base: #050814;
+  --primary: #7c3aed;
+  --primary-light: #a78bfa;
+  --primary-glow: rgba(124,58,237,0.35);
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6,182,212,0.3);
+  --gold: #f59e0b;
+  --gold-glow: rgba(245,158,11,0.3);
+  --emerald: #10b981;
+  --emerald-glow: rgba(16,185,129,0.3);
+  --red: #ef4444;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.1);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Animated Background ─── */
+.bg-anim {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.orb {
+  position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15;
+  animation: orbDrift 14s ease-in-out infinite;
+}
+.orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, #7c3aed, transparent); top: -250px; left: -200px; }
+.orb-2 { width: 600px; height: 600px; background: radial-gradient(circle, #06b6d4, transparent); top: 35%; right: -150px; animation-delay: 5s; }
+.orb-3 { width: 500px; height: 500px; background: radial-gradient(circle, #f59e0b, transparent); bottom: -150px; left: 25%; animation-delay: 9s; }
+
+@keyframes orbDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -50px) scale(1.06); }
+  66% { transform: translate(-30px, 40px) scale(0.96); }
+}
+
+/* ─── Slide Container ─── */
+.slides-container {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
+}
+
+.slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 60px 80px;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.slide.active {
+  opacity: 1; transform: translateX(0);
+  pointer-events: auto; visibility: visible;
+}
+
+.slide.exit-left {
+  opacity: 0; transform: translateX(-60px);
+  pointer-events: none; visibility: hidden;
+}
+
+.slide-inner {
+  width: 100%; max-width: 1200px;
+  animation: fadeUp 0.7s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Typography ─── */
+.slide-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 16px; border-radius: 50px;
+  background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+  color: var(--primary-light); font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.slide-title {
+  font-size: 52px; font-weight: 900; line-height: 1.1;
+  background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--cyan) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 16px;
+}
+
+.slide-title.smaller { font-size: 40px; }
+
+.slide-subtitle {
+  font-size: 20px; color: var(--text-secondary); font-weight: 400;
+  line-height: 1.6; max-width: 700px; margin-bottom: 36px;
+}
+
+.highlight { color: var(--gold); font-weight: 700; -webkit-text-fill-color: var(--gold); }
+.highlight-cyan { color: var(--cyan); font-weight: 700; -webkit-text-fill-color: var(--cyan); }
+.highlight-green { color: var(--emerald); font-weight: 700; -webkit-text-fill-color: var(--emerald); }
+.highlight-red { color: var(--red); font-weight: 700; -webkit-text-fill-color: var(--red); }
+
+/* ─── Glass Cards ─── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.glass-sm { border-radius: 12px; }
+
+/* ─── Grids ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-20 { gap: 20px; }
+.gap-32 { gap: 32px; }
+
+/* ─── Feature Cards ─── */
+.feat-card {
+  padding: 28px; transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.feat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(124,58,237,0.4);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px var(--primary-glow);
+}
+.feat-icon { font-size: 36px; margin-bottom: 14px; display: block; }
+.feat-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+.feat-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ─── Metric Stat ─── */
+.stat-card { padding: 24px; text-align: center; }
+.stat-value {
+  font-size: 36px; font-weight: 900; line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-value.violet { color: var(--primary-light); }
+.stat-value.cyan { color: var(--cyan); }
+.stat-value.gold { color: var(--gold); }
+.stat-value.green { color: var(--emerald); }
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+
+/* ─── Timeline ─── */
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before {
+  content: ''; position: absolute; left: 10px; top: 8px; bottom: 8px;
+  width: 2px; background: linear-gradient(to bottom, var(--primary), var(--cyan), var(--gold));
+  border-radius: 2px;
+}
+.timeline-item { position: relative; margin-bottom: 24px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--primary); border: 2px solid var(--primary-light);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+.timeline-item:nth-child(2)::before { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+.timeline-item:nth-child(3)::before { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px var(--gold-glow); }
+.timeline-item:nth-child(4)::before { background: var(--emerald); border-color: var(--emerald); box-shadow: 0 0 10px var(--emerald-glow); }
+.tl-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.tl-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ─── Comparison Table ─── */
+.comp-table { width: 100%; border-collapse: collapse; }
+.comp-table th {
+  padding: 14px 20px; text-align: left;
+  background: rgba(124,58,237,0.12); color: var(--primary-light);
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.comp-table td {
+  padding: 13px 20px; font-size: 14px; color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.comp-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* ─── Tech Stack Pills ─── */
+.tech-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 50px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  color: var(--text-secondary); font-size: 14px; font-weight: 600;
+  transition: all 0.3s ease;
+}
+.tech-pill:hover {
+  border-color: var(--primary-light); color: var(--text-primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+/* ─── Two-Column Layout ─── */
+.split-slide {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  align-items: center;
+}
+
+.split-slide.reverse { grid-template-columns: 1fr 1fr; }
+
+/* ─── Bullet Lists ─── */
+.bullet-list { list-style: none; }
+.bullet-list li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; font-size: 15px; color: var(--text-secondary);
+  line-height: 1.5;
+}
+.bullet-list li::before { display: none; }
+.bullet-dot {
+  width: 8px; height: 8px; min-width: 8px;
+  border-radius: 50%; margin-top: 6px;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+/* ─── Navigation Controls ─── */
+.nav-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 100; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px;
+  background: rgba(5,8,20,0.85);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+}
+
+.nav-brand {
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.nav-center {
+  display: flex; align-items: center; gap: 16px;
+}
+
+.nav-btn {
+  width: 44px; height: 44px; border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg); color: var(--text-primary);
+  font-size: 18px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.2s ease;
+}
+.nav-btn:hover {
+  background: rgba(124,58,237,0.2);
+  border-color: var(--primary-light);
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.slide-counter {
+  font-size: 13px; font-weight: 600; color: var(--text-muted);
+  min-width: 60px; text-align: center;
+}
+
+.slide-counter .current { color: var(--primary-light); font-size: 18px; font-weight: 800; }
+
+/* Progress bar */
+.progress-track {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; background: rgba(255,255,255,0.06); z-index: 100;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(to right, var(--primary), var(--cyan));
+  border-radius: 0 2px 2px 0;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* ─── Slide-Specific ─── */
+.title-slide { flex-direction: column; text-align: center; }
+.title-slide .slide-title { font-size: 64px; margin-bottom: 20px; }
+.title-slide .slide-subtitle { max-width: 600px; margin: 0 auto 40px; text-align: center; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 12px 28px; border-radius: 50px;
+  background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.15));
+  border: 1px solid rgba(124,58,237,0.3);
+  font-size: 14px; font-weight: 600; color: var(--primary-light);
+  margin-bottom: 28px;
+}
+
+.team-name {
+  font-size: 15px; color: var(--text-muted); font-weight: 500;
+  margin-top: 8px;
+}
+
+/* ─── Animated elements ─── */
+.stagger > * {
+  opacity: 0; transform: translateY(15px);
+  animation: staggerIn 0.5s ease forwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger > *:nth-child(6) { animation-delay: 0.6s; }
+.stagger > *:nth-child(7) { animation-delay: 0.7s; }
+.stagger > *:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes staggerIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Quote */
+.quote-block {
+  padding: 28px 32px;
+  border-left: 3px solid var(--gold);
+  font-size: 18px; font-style: italic; color: var(--text-secondary);
+  line-height: 1.7;
+}
+.quote-block strong { color: var(--gold); font-style: normal; }
+
+/* Glow text */
+.glow-text {
+  text-shadow: 0 0 20px var(--primary-glow), 0 0 40px rgba(124,58,237,0.15);
+}
+
+/* Section marker */
+.section-num {
+  font-size: 72px; font-weight: 900; color: rgba(124,58,237,0.08);
+  position: absolute; top: 30px; right: 50px;
+  line-height: 1;
+}
+
+/* Flow diagram */
+.flow-row {
+  display: flex; align-items: center; justify-content: center; gap: 0;
+  flex-wrap: wrap;
+}
+.flow-step {
+  padding: 14px 22px; border-radius: 12px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  font-size: 14px; font-weight: 600; color: var(--text-primary);
+  text-align: center; min-width: 130px;
+}
+.flow-arrow {
+  font-size: 22px; color: var(--primary-light); margin: 0 8px;
+}
+
+/* Pill badges */
+.lang-demo {
+  display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;
+}
+.lang-pill {
+  padding: 8px 20px; border-radius: 50px;
+  font-size: 14px; font-weight: 600;
+}
+.lang-en { background: rgba(124,58,237,0.15); color: var(--primary-light); border: 1px solid rgba(124,58,237,0.3); }
+.lang-hi { background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
+.lang-te { background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+
+/* Role cards */
+.role-card { padding: 24px; text-align: center; }
+.role-icon { font-size: 40px; margin-bottom: 10px; }
+.role-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.role-pin { font-size: 22px; font-weight: 800; color: var(--primary-light); margin-bottom: 8px; letter-spacing: 4px; }
+.role-access { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+/* CTA section */
+.cta-glow {
+  padding: 48px; text-align: center;
+  background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08));
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 24px;
+}
+.cta-title {
+  font-size: 32px; font-weight: 800; margin-bottom: 12px;
+  background: linear-gradient(135deg, #fff, var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cta-sub { font-size: 16px; color: var(--text-secondary); margin-bottom: 24px; }
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, var(--primary), #5b21b6);
+  color: #fff; font-size: 16px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 8px 25px var(--primary-glow);
+  transition: all 0.3s ease; font-family: 'Inter', sans-serif;
+}
+.cta-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 35px var(--primary-glow); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .slide { padding: 40px 30px; }
+  .slide-title { font-size: 36px !important; }
+  .split-slide { grid-template-columns: 1fr; gap: 24px; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-anim">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Progress Bar -->
+<div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  SLIDES                                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="slides-container" id="slidesContainer">
+
+<!-- ────── SLIDE 1: TITLE ────── -->
+<div class="slide active" data-slide="0">
+  <div class="slide-inner title-slide">
+    <div class="hero-badge">🧵 Team 5 — Software Engineering Project</div>
+    <h1 class="slide-title glow-text">Lakshmi Textile</h1>
+    <p class="slide-subtitle">A Smart Inventory Management System for Indian Textile Businesses — Built with Glassmorphic Design, Zero Installation Required</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:12px;">
+      <span class="tech-pill">📄 HTML5</span>
+      <span class="tech-pill">🎨 CSS3</span>
+      <span class="tech-pill">⚡ JavaScript</span>
+      <span class="tech-pill">📊 Chart.js</span>
+      <span class="tech-pill">💾 LocalStorage</span>
+    </div>
+    <p class="team-name" style="margin-top:28px;">Press <strong style="color:var(--primary-light)">→</strong> or <strong style="color:var(--primary-light)">Click</strong> to navigate</p>
+  </div>
+</div>
+
+<!-- ────── SLIDE 2: PROBLEM ────── -->
+<div class="slide" data-slide="1">
+  <div class="slide-inner">
+    <span class="section-num">01</span>
+    <div class="slide-tag">🔍 Problem Statement</div>
+    <h2 class="slide-title smaller">The Challenge at<br/>Lakshmi Textile</h2>
+    <div class="split-slide" style="margin-top:12px;">
+      <div>
+        <p class="slide-subtitle" style="margin-bottom:24px;">
+          Lakshmi Textile is an Indian textile shop struggling with <span class="highlight-red">zero digital tracking</span> of inventory. All materials coming in and going out are managed through paper-based processes.
+        </p>
+        <div class="quote-block glass glass-sm">
+          <strong>"We don't know how much stock we have, what's selling, or what we're losing."</strong>
+          <br/>— A common frustration in Indian textile retail
+        </div>
+      </div>
+      <div class="stagger">
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">📝 Paper-Based Tracking</div>
+          <div class="feat-desc">Manual registers that get lost, damaged, or have calculation errors</div>
+        </div>
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">❌ No Stock Visibility</div>
+          <div class="feat-desc">No real-time view of what's in the Godown vs. the shop floor</div>
+        </div>
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">💸 Untracked Losses</div>
+          <div class="feat-desc">Wastage, damage, and theft go completely undetected</div>
+        </div>
+        <div class="glass glass-sm feat-card">
+          <div class="feat-title">🧮 Manual Calculations</div>
+          <div class="feat-desc">Pricing, margins, and GST calculated by hand — prone to errors</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 3: UX CHALLENGE ────── -->
+<div class="slide" data-slide="2">
+  <div class="slide-inner">
+    <span class="section-num">02</span>
+    <div class="slide-tag">👥 User Experience Challenge</div>
+    <h2 class="slide-title smaller">Designing for<br/><span class="highlight">Non-Technical Users</span></h2>
+    <p class="slide-subtitle">The workforce includes warehouse staff, storekeepers, and sales clerks with varying technical expertise. Many are accustomed to paper.</p>
+    <div class="grid-4 stagger" style="margin-top:8px;">
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🔘</div>
+        <div class="feat-title">Large Buttons</div>
+        <div class="feat-desc">Touch-friendly, oversized controls with clear labels</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">📋</div>
+        <div class="feat-title">Minimal Typing</div>
+        <div class="feat-desc">Dropdowns, selectors, and auto-complete instead of text entry</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🚦</div>
+        <div class="feat-title">Visual Indicators</div>
+        <div class="feat-desc">Traffic light system: Green (OK), Yellow (Low), Red (Out)</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-title">Multilingual</div>
+        <div class="feat-desc">English, Hindi, and Telugu — instant switching</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🛡️</div>
+        <div class="feat-title">Error Prevention</div>
+        <div class="feat-desc">Confirmation modals, undo buttons, and stock validation</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">👤</div>
+        <div class="feat-title">Role-Based Views</div>
+        <div class="feat-desc">Different dashboards for Owner, Counter, and Godown staff</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">📱</div>
+        <div class="feat-title">Responsive Design</div>
+        <div class="feat-desc">Works on PC, tablet, and mobile screens</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Zero Installation</div>
+        <div class="feat-desc">Double-click HTML file — works instantly on any computer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 4: SOLUTION ────── -->
+<div class="slide" data-slide="3">
+  <div class="slide-inner">
+    <span class="section-num">03</span>
+    <div class="slide-tag">💡 Our Solution</div>
+    <h2 class="slide-title smaller">A Standalone Glassmorphic<br/><span class="highlight-cyan">Web Application</span></h2>
+    <div class="split-slide">
+      <div>
+        <p class="slide-subtitle">
+          We built a <span class="highlight-cyan">fully offline, serverless</span> web application that runs by simply opening an HTML file. No internet, no backend, no installation.
+        </p>
+        <ul class="bullet-list">
+          <li><span class="bullet-dot"></span>Runs in any browser — Chrome, Firefox, Edge</li>
+          <li><span class="bullet-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan-glow)"></span>All data saved locally using Browser LocalStorage</li>
+          <li><span class="bullet-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold-glow)"></span>Export & Import JSON backups with one click</li>
+          <li><span class="bullet-dot" style="background:var(--emerald);box-shadow:0 0 8px var(--emerald-glow)"></span>Pre-seeded with sample Indian textile data</li>
+        </ul>
+        <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;" class="lang-demo">
+          <span class="lang-pill lang-en">🇬🇧 English</span>
+          <span class="lang-pill lang-hi">🇮🇳 हिन्दी</span>
+          <span class="lang-pill lang-te">🇮🇳 తెలుగు</span>
+        </div>
+      </div>
+      <div>
+        <div class="glass" style="padding:24px;">
+          <div style="font-size:13px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Tech Stack</div>
+          <div class="stagger">
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="font-size:24px;">📄</span>
+              <div><div style="font-weight:700;">HTML5</div><div style="font-size:12px;color:var(--text-muted)">Structure & semantic markup</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="font-size:24px;">🎨</span>
+              <div><div style="font-weight:700;">CSS3 (Glassmorphism)</div><div style="font-size:12px;color:var(--text-muted)">Frosted glass, blur effects, animations</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="font-size:24px;">⚡</span>
+              <div><div style="font-weight:700;">Vanilla JavaScript</div><div style="font-size:12px;color:var(--text-muted)">Business logic, CRUD, navigation</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="font-size:24px;">📊</span>
+              <div><div style="font-weight:700;">Chart.js (CDN)</div><div style="font-size:12px;color:var(--text-muted)">Interactive data visualizations</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 0;">
+              <span style="font-size:24px;">💾</span>
+              <div><div style="font-weight:700;">Browser LocalStorage</div><div style="font-size:12px;color:var(--text-muted)">Persistent offline data storage</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 5: SECURITY & LOGIN ────── -->
+<div class="slide" data-slide="4">
+  <div class="slide-inner">
+    <span class="section-num">04</span>
+    <div class="slide-tag">🔐 Security</div>
+    <h2 class="slide-title smaller">Role-Based<br/><span class="highlight">PIN Login System</span></h2>
+    <p class="slide-subtitle">Three distinct roles with separate access levels — each with a simple 4-digit PIN for ease of use.</p>
+    <div class="grid-3 stagger" style="margin-top:12px;">
+      <div class="glass role-card">
+        <div class="role-icon">👑</div>
+        <div class="role-name">Malik (Owner)</div>
+        <div class="role-pin">1 2 3 4</div>
+        <div class="role-access">
+          ✅ Dashboard & Reports<br/>
+          ✅ Billing & Stock<br/>
+          ✅ Vyapaari & Calculators<br/>
+          ✅ Financial Analytics
+        </div>
+      </div>
+      <div class="glass role-card">
+        <div class="role-icon">🏪</div>
+        <div class="role-name">Counter Staff</div>
+        <div class="role-pin">2 2 2 2</div>
+        <div class="role-access">
+          ✅ Dukaan Billing<br/>
+          ✅ Stock Viewing<br/>
+          ❌ No profit visibility<br/>
+          ❌ No supplier access
+        </div>
+      </div>
+      <div class="glass role-card">
+        <div class="role-icon">📦</div>
+        <div class="role-name">Godown Staff</div>
+        <div class="role-pin">3 3 3 3</div>
+        <div class="role-access">
+          ✅ Stock Manager<br/>
+          ✅ Order Receiving<br/>
+          ❌ No billing access<br/>
+          ❌ No financial data
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 6: DASHBOARD ────── -->
+<div class="slide" data-slide="5">
+  <div class="slide-inner">
+    <span class="section-num">05</span>
+    <div class="slide-tag">📊 Feature — Dashboard</div>
+    <h2 class="slide-title smaller">Owner's Business<br/><span class="highlight-cyan">Dashboard</span></h2>
+    <p class="slide-subtitle">Real-time financial overview with animated metric cards, interactive charts, and intelligent alerts.</p>
+    <div class="grid-3 stagger">
+      <div class="glass glass-sm stat-card">
+        <div class="stat-value gold">₹45,193</div>
+        <div class="stat-label">Lifetime Earnings</div>
+      </div>
+      <div class="glass glass-sm stat-card">
+        <div class="stat-value cyan">₹45,193</div>
+        <div class="stat-label">This Month Sales</div>
+      </div>
+      <div class="glass glass-sm stat-card">
+        <div class="stat-value green">₹15,930</div>
+        <div class="stat-label">Net Profit</div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="glass glass-sm feat-card">
+        <div class="feat-title">📈 Sales vs Expense Trend</div>
+        <div class="feat-desc">Dual-axis area chart comparing monthly revenue against purchase expenses over the last 6 months — helps spot spending patterns.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-title">🍕 Stock Value Distribution</div>
+        <div class="feat-desc">Donut chart breaking down how much capital is tied up in each category — Sarees, Thans, Kurtis, etc.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-title">🎯 Monthly Target Rings</div>
+        <div class="feat-desc">SVG progress circles showing sales target achievement, profit margin health, and stock utilization.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-title">🚨 Low Stock Alerts</div>
+        <div class="feat-desc">Color-coded alert cards for items below reorder level — one-click option to place orders immediately.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 7: BILLING ────── -->
+<div class="slide" data-slide="6">
+  <div class="slide-inner">
+    <span class="section-num">06</span>
+    <div class="slide-tag">🏪 Feature — Billing</div>
+    <h2 class="slide-title smaller">Dukaan Billing<br/><span class="highlight-green">(Counter POS)</span></h2>
+    <div class="split-slide">
+      <div>
+        <p class="slide-subtitle">
+          A touchscreen-friendly Point of Sale interface for counter staff. Select category, pick item, set quantity, and bill — all in seconds.
+        </p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="tl-title">1. Select Category</div>
+            <div class="tl-desc">Tap visual tiles: Saree, Kurta, Than, Lungi, Dupatta, Accessories</div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-title">2. Choose Item</div>
+            <div class="tl-desc">Auto-filtered dropdown showing only items with available stock</div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-title">3. Set Quantity</div>
+            <div class="tl-desc">Large + / − buttons for meters or pieces. Supports decimals (0.5m).</div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-title">4. Complete Sale</div>
+            <div class="tl-desc">Bill auto-calculates subtotal + 5% GST. Stock deducted from Dukaan instantly.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="glass" style="padding:28px;">
+          <div style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Sample Bill Output</div>
+          <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:10px 0;display:flex;justify-content:space-between;">
+            <span style="font-size:14px;">Kanjivaram Silk Saree × 2</span>
+            <span style="color:var(--gold);font-weight:700;">₹9,600</span>
+          </div>
+          <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:10px 0;display:flex;justify-content:space-between;">
+            <span style="font-size:14px;">Cotton Than × 10m</span>
+            <span style="color:var(--gold);font-weight:700;">₹1,300</span>
+          </div>
+          <div style="padding:10px 0;display:flex;justify-content:space-between;color:var(--text-muted);font-size:13px;">
+            <span>Subtotal</span><span>₹10,900</span>
+          </div>
+          <div style="padding:6px 0;display:flex;justify-content:space-between;color:var(--text-muted);font-size:13px;">
+            <span>GST (5%)</span><span>₹545</span>
+          </div>
+          <div style="padding:14px 0 0;display:flex;justify-content:space-between;font-size:20px;font-weight:800;border-top:1px solid rgba(255,255,255,0.1);color:var(--gold);">
+            <span>Total</span><span>₹11,445</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 8: STOCK MANAGER ────── -->
+<div class="slide" data-slide="7">
+  <div class="slide-inner">
+    <span class="section-num">07</span>
+    <div class="slide-tag">📦 Feature — Stock</div>
+    <h2 class="slide-title smaller">Godown & Dukaan<br/><span class="highlight">Stock Manager</span></h2>
+    <p class="slide-subtitle">Complete inventory control with real-time adjustments, transfers, and wastage logging.</p>
+    <div class="grid-3 stagger">
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">➕</div>
+        <div class="feat-title">Add New Items</div>
+        <div class="feat-desc">Name, category, quantity (Godown + Dukaan), buy/sell price, rack location, and reorder threshold.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Quick +/− Adjustments</div>
+        <div class="feat-desc">Inline buttons on every row for instant stock corrections — no modal needed for small changes.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🔄</div>
+        <div class="feat-title">Godown → Dukaan Transfer</div>
+        <div class="feat-desc">Select item, specify quantity, and transfer stock from warehouse to shop floor with one click.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">⚠️</div>
+        <div class="feat-title">Kharaab Maal (Wastage)</div>
+        <div class="feat-desc">Log damaged, soiled, or scrapped items with reason. Auto-deducts from stock and records financial loss.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-title">Search & Filter</div>
+        <div class="feat-desc">Instant search by item name, fabric type, or color. Filter by location (Godown/Dukaan) or low stock.</div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🚦</div>
+        <div class="feat-title">Traffic Light Status</div>
+        <div class="feat-desc">Green = Normal, Orange = Kam Stock (Reorder!), Red = Maal Khatam (Out of Stock).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 9: SUPPLIER ────── -->
+<div class="slide" data-slide="8">
+  <div class="slide-inner">
+    <span class="section-num">08</span>
+    <div class="slide-tag">🤝 Feature — Vyapaari</div>
+    <h2 class="slide-title smaller">Supplier Hub &<br/><span class="highlight-cyan">Order Tracker</span></h2>
+    <div class="split-slide">
+      <div>
+        <p class="slide-subtitle">
+          A complete supply chain management module. Contact suppliers via WhatsApp, place orders, and track deliveries through a visual pipeline.
+        </p>
+        <div style="margin-top:16px;">
+          <div class="flow-row" style="margin-bottom:28px;">
+            <div class="flow-step" style="border-color:var(--gold);">🟠 Ordered</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" style="border-color:var(--cyan);">🔵 In Transit</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step" style="border-color:var(--emerald);">🟢 Delivered</div>
+          </div>
+        </div>
+        <ul class="bullet-list">
+          <li><span class="bullet-dot"></span><strong style="color:var(--text-primary);">Auto-Inward:</strong> When "Maal Mila" is clicked, stock automatically adds to Godown</li>
+          <li><span class="bullet-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan-glow)"></span><strong style="color:var(--text-primary);">WhatsApp Integration:</strong> Pre-filled Hindi order messages sent to supplier</li>
+          <li><span class="bullet-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold-glow)"></span><strong style="color:var(--text-primary);">Spend Analytics:</strong> Pie chart showing money spent per Vyapaari</li>
+        </ul>
+      </div>
+      <div class="stagger">
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">📇 Vyapaari Directory</div>
+          <div class="feat-desc">Name, city, phone, email, specialty, GSTIN — all stored locally with one-click WhatsApp contact.</div>
+        </div>
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">📝 Khareedi Order Creation</div>
+          <div class="feat-desc">Select Vyapaari → Item → Qty → Cost → Expected Date. Total cost calculated live.</div>
+        </div>
+        <div class="glass glass-sm feat-card">
+          <div class="feat-title">📊 Order History Charts</div>
+          <div class="feat-desc">Horizontal bar chart of last 10 orders color-coded by status + supplier spend pie chart.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 10: CALCULATORS ────── -->
+<div class="slide" data-slide="9">
+  <div class="slide-inner">
+    <span class="section-num">09</span>
+    <div class="slide-tag">🧮 Feature — Calculators</div>
+    <h2 class="slide-title smaller">Smart Textile<br/><span class="highlight">Business Calculators</span></h2>
+    <p class="slide-subtitle">Four purpose-built calculators that solve daily math problems for textile shop owners.</p>
+    <div class="grid-2 stagger" style="margin-top:8px;">
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">💰</div>
+        <div class="feat-title">Kamaai Calculator (Profit Margin)</div>
+        <div class="feat-desc">
+          Input: Buy Price + Overhead + Margin %<br/>
+          Output: Selling Price, Net Profit (₹), Markup %, GST-inclusive Price<br/>
+          <strong style="color:var(--primary-light);">Interactive slider</strong> for margin % that updates results in real time.
+        </div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">📏</div>
+        <div class="feat-title">Than Yield (GSM to Meters)</div>
+        <div class="feat-desc">
+          Input: Roll weight (Kg), fabric width (cm), GSM<br/>
+          Output: Estimated length in meters + yard conversion<br/>
+          <strong style="color:var(--cyan);">Verify</strong> if suppliers sent correct fabric length without unrolling!
+        </div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">🌸</div>
+        <div class="feat-title">Mausam Predictor (Seasonal Demand)</div>
+        <div class="feat-desc">
+          Input: Last month sales + Season dropdown (Diwali +80%, Monsoon -25%)<br/>
+          Output: Recommended order quantity with safety buffer<br/>
+          <strong style="color:var(--gold);">9 pre-set seasons</strong> from Indian festivals to school reopening.
+        </div>
+      </div>
+      <div class="glass glass-sm feat-card">
+        <div class="feat-icon">⚠️</div>
+        <div class="feat-title">Kharaab Maal (Wastage Loss)</div>
+        <div class="feat-desc">
+          Input: Wasted meters + Cost per meter + Monthly sales<br/>
+          Output: Total loss (₹), Loss as % of sales, Severity gauge<br/>
+          <strong style="color:var(--red);">Visual SVG gauge</strong> shows how badly wastage is eating into profits.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 11: VISUALIZATIONS ────── -->
+<div class="slide" data-slide="10">
+  <div class="slide-inner">
+    <span class="section-num">10</span>
+    <div class="slide-tag">📈 Feature — Visualizations</div>
+    <h2 class="slide-title smaller">Interactive<br/><span class="highlight-cyan">Data Visualizations</span></h2>
+    <p class="slide-subtitle">6 types of interactive charts powered by Chart.js, styled to match the glassmorphic design.</p>
+    <div class="grid-3 stagger">
+      <div class="glass glass-sm feat-card" style="text-align:center;">
+        <div class="feat-icon">📈</div>
+        <div class="feat-title">Sales vs Expense</div>
+        <div class="feat-desc">Dual-line area chart with gradient fills — 6 month trend</div>
+      </div>
+      <div class="glass glass-sm feat-card" style="text-align:center;">
+        <div class="feat-icon">🍕</div>
+        <div class="feat-title">Stock Donut</div>
+        <div class="feat-desc">Category-wise stock value distribution with hover tooltips</div>
+      </div>
+      <div class="glass glass-sm feat-card" style="text-align:center;">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Profit Bar Chart</div>
+        <div class="feat-desc">Average margin % per category — identifies most profitable items</div>
+      </div>
+      <div class="glass glass-sm feat-card" style="text-align:center;">
+        <div class="feat-icon">🎯</div>
+        <div class="feat-title">SVG Progress Rings</div>
+        <div class="feat-desc">Monthly target %, profit health, and stock capacity gauges</div>
+      </div>
+      <div class="glass glass-sm feat-card" style="text-align:center;">
+        <div class="feat-icon">💸</div>
+        <div class="feat-title">Supplier Spend Pie</div>
+        <div class="feat-desc">Spend distribution across Vyapaaris — find biggest suppliers</div>
+      </div>
+      <div class="glass glass-sm feat-card" style="text-align:center;">
+        <div class="feat-icon">⚠️</div>
+        <div class="feat-title">Wastage Gauge</div>
+        <div class="feat-desc">Semi-circular SVG gauge showing loss severity with color coding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 12: MULTILINGUAL ────── -->
+<div class="slide" data-slide="11">
+  <div class="slide-inner">
+    <span class="section-num">11</span>
+    <div class="slide-tag">🌐 Feature — i18n</div>
+    <h2 class="slide-title smaller">Multilingual<br/><span class="highlight-green">Interface</span></h2>
+    <div class="split-slide">
+      <div>
+        <p class="slide-subtitle">
+          One-tap language switching between 3 languages. The selected language is <span class="highlight-green">remembered across sessions</span> using localStorage.
+        </p>
+        <div style="margin-top:20px;">
+          <div class="lang-demo" style="margin-bottom:20px;">
+            <span class="lang-pill lang-en" style="font-size:16px;padding:12px 24px;">🇬🇧 English</span>
+            <span class="lang-pill lang-hi" style="font-size:16px;padding:12px 24px;">🇮🇳 हिन्दी</span>
+            <span class="lang-pill lang-te" style="font-size:16px;padding:12px 24px;">🇮🇳 తెలుగు</span>
+          </div>
+        </div>
+        <ul class="bullet-list">
+          <li><span class="bullet-dot"></span>200+ translation keys covering every label, button, and alert</li>
+          <li><span class="bullet-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan-glow)"></span>Uses <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;font-size:12px;">data-i18n</code> attributes for instant DOM updates</li>
+          <li><span class="bullet-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold-glow)"></span>Google Fonts with Noto Sans Devanagari & Telugu script support</li>
+        </ul>
+      </div>
+      <div>
+        <div class="glass" style="padding:24px;overflow:hidden;">
+          <table class="comp-table">
+            <thead><tr><th>English</th><th>हिन्दी</th><th>తెలుగు</th></tr></thead>
+            <tbody>
+              <tr><td>Godown Stock</td><td>गोदाम स्टॉक</td><td>గోడౌన్ స్టాక్</td></tr>
+              <tr><td>Dukaan Stock</td><td>दुकान स्टॉक</td><td>దుకాణం స్టాక్</td></tr>
+              <tr><td>Vyapaari</td><td>व्यापारी</td><td>వ్యాపారి</td></tr>
+              <tr><td>Place Order</td><td>ऑर्डर माल</td><td>ఆర్డర్ చేయండి</td></tr>
+              <tr><td>Wastage</td><td>ख़राब माल</td><td>ఖరాబ్ మాల్</td></tr>
+              <tr><td>Calculator</td><td>कैलकुलेटर</td><td>లెక్కలు</td></tr>
+              <tr><td>Net Profit</td><td>शुद्ध मुनाफ़ा</td><td>నికర లాభం</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 13: DATA & BACKUP ────── -->
+<div class="slide" data-slide="12">
+  <div class="slide-inner">
+    <span class="section-num">12</span>
+    <div class="slide-tag">💾 Architecture</div>
+    <h2 class="slide-title smaller">Data Architecture<br/>&amp; <span class="highlight">Backup System</span></h2>
+    <div class="split-slide">
+      <div>
+        <p class="slide-subtitle">
+          All data is stored in the browser using <span class="highlight-cyan">localStorage</span> with structured JSON. The app initializes with rich seed data on first launch.
+        </p>
+        <div class="glass glass-sm" style="padding:20px;margin-top:16px;">
+          <div style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Data Modules</div>
+          <div class="stagger">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;">
+              <span>📦 Stock Items</span><span style="color:var(--primary-light);">15 seeded</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;">
+              <span>🤝 Suppliers</span><span style="color:var(--cyan);">5 seeded</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;">
+              <span>🚚 Orders</span><span style="color:var(--gold);">5 seeded</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;">
+              <span>🛒 Sales Records</span><span style="color:var(--emerald);">10 seeded</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+              <span>⚠️ Wastage Log</span><span style="color:var(--red);">2 seeded</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">📥 One-Click Backup Export</div>
+          <div class="feat-desc">Downloads a complete JSON file with all stock, sales, supplier, and order data. Named with today's date for easy tracking.</div>
+        </div>
+        <div class="glass glass-sm feat-card" style="margin-bottom:14px;">
+          <div class="feat-title">📤 Drag & Drop Restore</div>
+          <div class="feat-desc">Upload a backup JSON file to restore all data — transfers between computers or recovers after browser history clearing.</div>
+        </div>
+        <div class="glass glass-sm feat-card">
+          <div class="feat-title">🔒 Session Management</div>
+          <div class="feat-desc">Login sessions use sessionStorage (auto-logout on browser close). Data persists in localStorage across sessions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 14: FILE STRUCTURE ────── -->
+<div class="slide" data-slide="13">
+  <div class="slide-inner">
+    <span class="section-num">13</span>
+    <div class="slide-tag">📁 Project</div>
+    <h2 class="slide-title smaller">Project<br/><span class="highlight-cyan">File Structure</span></h2>
+    <div class="split-slide">
+      <div>
+        <div class="glass" style="padding:28px;font-family:monospace;">
+          <div style="font-size:13px;color:var(--text-muted);font-family:'Inter';font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">📂 team 5/</div>
+          <div style="line-height:2.2;font-size:14px;">
+            <div>├── <span style="color:var(--gold);font-weight:700;">index.html</span> <span style="color:var(--text-muted);font-size:11px;">← Double-click to run!</span></div>
+            <div>├── 📁 <span style="color:var(--primary-light);">css/</span></div>
+            <div>│&nbsp;&nbsp; ├── <span style="color:var(--cyan);">glass.css</span> <span style="color:var(--text-muted);font-size:11px;">Design system</span></div>
+            <div>│&nbsp;&nbsp; └── <span style="color:var(--cyan);">app.css</span> <span style="color:var(--text-muted);font-size:11px;">Components</span></div>
+            <div>├── 📁 <span style="color:var(--primary-light);">js/</span></div>
+            <div>│&nbsp;&nbsp; ├── <span style="color:var(--emerald);">lang.js</span> <span style="color:var(--text-muted);font-size:11px;">3-language dictionary</span></div>
+            <div>│&nbsp;&nbsp; ├── <span style="color:var(--emerald);">data.js</span> <span style="color:var(--text-muted);font-size:11px;">localStorage CRUD</span></div>
+            <div>│&nbsp;&nbsp; ├── <span style="color:var(--emerald);">auth.js</span> <span style="color:var(--text-muted);font-size:11px;">PIN login & roles</span></div>
+            <div>│&nbsp;&nbsp; ├── <span style="color:var(--emerald);">charts.js</span> <span style="color:var(--text-muted);font-size:11px;">Chart.js visuals</span></div>
+            <div>│&nbsp;&nbsp; ├── <span style="color:var(--emerald);">calculators.js</span> <span style="color:var(--text-muted);font-size:11px;">4 calculators</span></div>
+            <div>│&nbsp;&nbsp; └── <span style="color:var(--emerald);">app.js</span> <span style="color:var(--text-muted);font-size:11px;">Main controller</span></div>
+            <div>└── <span style="color:var(--gold);">presentation.html</span> <span style="color:var(--text-muted);font-size:11px;">This deck!</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="grid-2 stagger">
+          <div class="glass glass-sm stat-card">
+            <div class="stat-value violet">8</div>
+            <div class="stat-label">Source Files</div>
+          </div>
+          <div class="glass glass-sm stat-card">
+            <div class="stat-value cyan">~140</div>
+            <div class="stat-label">KB Total Size</div>
+          </div>
+          <div class="glass glass-sm stat-card">
+            <div class="stat-value gold">200+</div>
+            <div class="stat-label">Translation Keys</div>
+          </div>
+          <div class="glass glass-sm stat-card">
+            <div class="stat-value green">0</div>
+            <div class="stat-label">Dependencies</div>
+          </div>
+        </div>
+        <div class="glass glass-sm feat-card" style="margin-top:16px;">
+          <div class="feat-title">🚫 Zero Backend</div>
+          <div class="feat-desc">No servers, no databases, no build tools. Pure HTML + CSS + JS running entirely in the browser. Chart.js loaded from CDN for visualizations.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 15: THANK YOU ────── -->
+<div class="slide" data-slide="14">
+  <div class="slide-inner title-slide">
+    <div class="hero-badge">🎯 Summary</div>
+    <h1 class="slide-title glow-text" style="font-size:56px;">Thank You!</h1>
+    <p class="slide-subtitle" style="text-align:center;">
+      Lakshmi Textile's new inventory system empowers non-technical staff with a beautiful, intuitive, and fully offline solution — built entirely with web technologies.
+    </p>
+
+    <div class="cta-glow" style="max-width:700px;margin:0 auto;">
+      <div class="cta-title">🧵 Ready to Demo?</div>
+      <div class="cta-sub">Open the app live and show the audience!</div>
+      <button class="cta-btn" onclick="window.open('index.html','_blank')">
+        🚀 Launch Lakshmi Textile App
+      </button>
+    </div>
+
+    <p class="team-name" style="margin-top:32px;font-size:14px;">
+      <strong style="color:var(--primary-light);">Team 5</strong> · Software Engineering Project
+    </p>
+  </div>
+</div>
+
+</div><!-- /slides-container -->
+
+<!-- ─── NAVIGATION BAR ─── -->
+<div class="nav-bar">
+  <div class="nav-brand">🧵 Lakshmi Textile — Presentation</div>
+  <div class="nav-center">
+    <button class="nav-btn" onclick="prevSlide()" title="Previous (← arrow)">◀</button>
+    <div class="slide-counter">
+      <span class="current" id="slideNum">1</span> / <span id="totalSlides">15</span>
+    </div>
+    <button class="nav-btn" onclick="nextSlide()" title="Next (→ arrow)">▶</button>
+  </div>
+  <div style="font-size:12px;color:var(--text-muted);">← → Arrow Keys to Navigate</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  PRESENTATION ENGINE                            -->
+<!-- ═══════════════════════════════════════════════ -->
+<script>
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+
+document.getElementById('totalSlides').textContent = totalSlides;
+
+function goToSlide(n) {
+  if (n < 0 || n >= totalSlides || n === currentSlide) return;
+
+  const dir = n > currentSlide ? 1 : -1;
+  const oldSlide = currentSlide;
+  currentSlide = n;
+
+  // Setup the entering slide BEFORE transition so it comes from the right side
+  slides[currentSlide].style.transition = 'none';
+  slides[currentSlide].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+  slides[currentSlide].style.opacity = '0';
+  slides[currentSlide].style.visibility = 'hidden';
+  
+  // Force reflow
+  void slides[currentSlide].offsetWidth;
+  
+  // Apply transitions
+  slides[oldSlide].style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+  slides[currentSlide].style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+  // Exit old slide
+  slides[oldSlide].classList.remove('active');
+  slides[oldSlide].style.transform = dir > 0 ? 'translateX(-60px)' : 'translateX(60px)';
+  slides[oldSlide].style.opacity = '0';
+  slides[oldSlide].style.visibility = 'hidden';
+
+  // Enter new slide
+  slides[currentSlide].classList.add('active');
+  slides[currentSlide].style.transform = 'translateX(0)';
+  slides[currentSlide].style.opacity = '1';
+  slides[currentSlide].style.visibility = 'visible';
+
+  // Update counter
+  document.getElementById('slideNum').textContent = currentSlide + 1;
+
+  // Update progress
+  const pct = ((currentSlide) / (totalSlides - 1)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+}
+
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+  if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+});
+
+// Touch swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].screenX - touchStartX;
+  if (Math.abs(diff) > 60) { diff < 0 ? nextSlide() : prevSlide(); }
+});
+
+// Initialize progress
+document.getElementById('progress').style.width = '0%';
+</script>
+
+</body>
+</html>

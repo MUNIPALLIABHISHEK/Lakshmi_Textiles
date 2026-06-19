@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Lakshmi Textile — Smart Inventory Management System for tracking stock, sales, supplier orders and profit analytics."/>
+  <title data-i18n="app.name">Lakshmi Textile — Smart Inventory</title>
+  <link rel="stylesheet" href="css/glass.css"/>
+  <link rel="stylesheet" href="css/app.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  ANIMATED BACKGROUND ORBS                       -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="bg-animated">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+</div>
+
+<div id="app-root">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  LOGIN PAGE                                     -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="login-page" style="display:flex;">
+  <div class="login-wrapper">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="logo-icon">🧵</div>
+      <h1 data-i18n="app.name">Lakshmi Textile</h1>
+      <p data-i18n="app.tagline">Smart Inventory Management</p>
+    </div>
+
+    <!-- Language Toggle -->
+    <div style="display:flex;justify-content:center;margin-bottom:24px;">
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
+        <button class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">हिन्दी</button>
+        <button class="lang-btn" data-lang="te" onclick="setLanguage('te')">తెలుగు</button>
+      </div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="glass-heavy login-card">
+      <p class="text-secondary fs-sm mb-16" data-i18n="login.subtitle">Select your role and enter your PIN</p>
+
+      <!-- Role Selector -->
+      <div class="role-selector">
+        <button class="role-btn" data-role="owner">
+          <span class="role-icon">👑</span>
+          <span data-i18n="role.owner">Malik</span>
+        </button>
+        <button class="role-btn" data-role="sales">
+          <span class="role-icon">🏪</span>
+          <span data-i18n="role.sales">Counter</span>
+        </button>
+        <button class="role-btn" data-role="godown">
+          <span class="role-icon">📦</span>
+          <span data-i18n="role.godown">Godown</span>
+        </button>
+      </div>
+
+      <!-- PIN Display -->
+      <div class="pin-display">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+
+      <!-- PIN Pad -->
+      <div class="pin-pad">
+        <button class="pin-key" data-val="1">1</button>
+        <button class="pin-key" data-val="2">2</button>
+        <button class="pin-key" data-val="3">3</button>
+        <button class="pin-key" data-val="4">4</button>
+        <button class="pin-key" data-val="5">5</button>
+        <button class="pin-key" data-val="6">6</button>
+        <button class="pin-key" data-val="7">7</button>
+        <button class="pin-key" data-val="8">8</button>
+        <button class="pin-key" data-val="9">9</button>
+        <button class="pin-key clear-key" data-val="clear">✕</button>
+        <button class="pin-key zero-key" data-val="0">0</button>
+        <button class="pin-key clear-key" data-val="back">⌫</button>
+      </div>
+
+      <!-- Hint -->
+      <p class="text-muted fs-xs" style="text-align:center;margin-top:16px;">
+        Malik PIN: 1234 · Counter: 2222 · Godown: 3333
+      </p>
+    </div>
+
+    <!-- Backup Import on Login -->
+    <div style="text-align:center;margin-top:16px;">
+      <label for="import-backup-login" class="btn btn-ghost" style="cursor:pointer;font-size:12px;">
+        📤 Restore Backup
+      </label>
+      <input type="file" id="import-backup-login" accept=".json" style="display:none;"
+        onchange="importBackup(this.files[0])"/>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  MAIN APP PAGE                                  -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="app-page" style="display:none;">
+
+  <!-- HEADER -->
+  <header id="app-header">
+    <div class="header-brand">
+      <div class="header-logo">🧵</div>
+      <div>
+        <div class="header-brand-name" data-i18n="app.name">Lakshmi Textile</div>
+        <div class="header-brand-sub" id="header-date"></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <!-- Language Toggle -->
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</button>
+        <button class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</button>
+      </div>
+      <!-- User badge -->
+      <div class="user-badge" id="user-badge">👑 Malik</div>
+      <!-- Backup -->
+      <button class="btn btn-ghost" style="padding:7px 14px;font-size:12px;" onclick="exportBackup()" data-tooltip="Export data backup">📥</button>
+      <!-- Logout -->
+      <button class="btn btn-danger" style="padding:7px 14px;font-size:12px;" onclick="logout()" data-i18n="logout">Logout</button>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav id="app-nav">
+    <button class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <span class="nav-icon">📊</span>
+      <span data-i18n="nav.dashboard">Dashboard</span>
+    </button>
+    <button class="nav-tab" data-tab="billing" onclick="switchTab('billing')">
+      <span class="nav-icon">🏪</span>
+      <span data-i18n="nav.billing">Dukaan Billing</span>
+    </button>
+    <button class="nav-tab" data-tab="stock" onclick="switchTab('stock')">
+      <span class="nav-icon">📦</span>
+      <span data-i18n="nav.stock">Stock Manager</span>
+    </button>
+    <button class="nav-tab" data-tab="supplier" onclick="switchTab('supplier')">
+      <span class="nav-icon">🤝</span>
+      <span data-i18n="nav.supplier">Vyapaari</span>
+    </button>
+    <button class="nav-tab" data-tab="calculators" onclick="switchTab('calculators')">
+      <span class="nav-icon">🧮</span>
+      <span data-i18n="nav.calculators">Calculators</span>
+    </button>
+    <button class="nav-tab" data-tab="reports" onclick="switchTab('reports')">
+      <span class="nav-icon">📈</span>
+      <span data-i18n="nav.reports">Reports</span>
+    </button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="app-content">
+
+    <!-- ═══════════ DASHBOARD ═══════════ -->
+    <section id="section-dashboard" class="section-panel active">
+      <div class="page-header flex-between">
+        <div>
+          <h2 class="page-title" data-i18n="dash.title">Business Dashboard</h2>
+          <p class="page-subtitle" data-i18n="dash.subtitle">Real-time overview of Lakshmi Textile</p>
+        </div>
+      </div>
+
+      <!-- Metric Cards -->
+      <div class="metrics-grid" id="metrics-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="charts-grid" style="grid-template-columns:2fr 1fr;">
+        <div class="glass-card chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">📈 <span data-i18n="report.sales.trend">Sales vs Expense Trend</span></span>
+            <span class="badge badge-cyan">Last 6 Months</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-sales-expense"></canvas>
+          </div>
+        </div>
+        <div class="glass-card chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">🍕 <span data-i18n="report.stock.dist">Stock Distribution</span></span>
+            <span class="badge badge-violet">By Value</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-stock-donut"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Rings + Low Stock Alerts -->
+      <div class="two-col" style="gap:20px;">
+        <!-- Target Rings -->
+        <div class="glass-card p-24">
+          <div class="section-title">🎯 <span data-i18n="dash.target">Monthly Target</span></div>
+          <div id="target-rings" style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;padding:12px 0;">
+            <!-- SVG rings rendered by JS -->
+          </div>
+        </div>
+        <!-- Low Stock Alerts -->
+        <div class="glass-card p-24">
+          <div class="section-title">🚨 <span data-i18n="dash.low.stock">Low Stock Alerts</span></div>
+          <div id="low-stock-alerts">
+            <!-- Alerts rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Sales Table -->
+      <div class="glass-card table-wrapper" style="margin-top:20px;">
+        <div class="table-header">
+          <span class="section-title mb-0" style="margin-bottom:0;">🛒 <span data-i18n="dash.recent.sales">Recent Sales</span></span>
+          <span class="badge badge-green" id="sales-count-badge">0 Sales Today</span>
+        </div>
+        <div class="table-scroll">
+          <table class="glass-table" id="recent-sales-table">
+            <thead>
+              <tr>
+                <th data-i18n="common.date">Date</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Total (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="recent-sales-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ DUKAAN BILLING ═══════════ -->
+    <section id="section-billing" class="section-panel">
+      <div class="page-header">
+        <h2 class="page-title" data-i18n="billing.title">Dukaan Billing</h2>
+        <p class="page-subtitle" data-i18n="billing.subtitle">Select item, enter quantity, generate bill</p>
+      </div>
+
+      <div class="two-col" style="align-items:start;">
+        <!-- LEFT: Item Selection -->
+        <div>
+          <!-- Category Tiles -->
+          <div class="section-title" data-i18n="billing.select.cat">Select Category</div>
+          <div class="category-grid" id="cat-grid">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Item Select -->
+          <div class="glass-card p-20" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label" data-i18n="billing.select.item">Select Item</label>
+              <select class="input-glass" id="billing-item-select">
+                <option value="">-- Select --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="billing.qty">Quantity / Meters</label>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <button class="btn btn-danger btn-icon" onclick="adjustBillingQty(-1)">−</button>
+                <input class="input-glass" type="number" id="billing-qty" value="1" min="0.5" step="0.5" style="text-align:center;font-size:20px;font-weight:700;max-width:120px;"/>
+                <button class="btn btn-emerald btn-icon" onclick="adjustBillingQty(1)">+</button>
+              </div>
+            </div>
+            <div class="form-group" id="billing-item-preview" style="display:none;">
+              <div style="padding:12px;background:rgba(124,58,237,0.08);border-radius:10px;border:1px solid rgba(124,58,237,0.2);">
+                <div class="fs-sm text-secondary">Selected: <strong class="text-primary" id="billing-preview-name">-</strong></div>
+                <div class="fs-sm text-muted">Price: <strong class="text-gold" id="billing-preview-price">₹0</strong> per unit</div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-lg w-full" onclick="addToBill()" data-i18n="billing.add">Add to Bill</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Bill Panel -->
+        <div class="glass-card bill-panel">
+          <div class="flex-between mb-16">
+            <span class="section-title mb-0" data-i18n="billing.bill">Current Bill</span>
+            <span class="badge badge-gold" id="bill-item-count">0 items</span>
+          </div>
+
+          <div id="bill-items-list">
+            <div class="empty-state" id="bill-empty">
+              <div class="empty-icon">🧾</div>
+              <div class="empty-text" data-i18n="billing.empty">No items added yet</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Totals -->
+          <div id="bill-totals" style="display:none;">
+            <div class="bill-item-row">
+              <span class="text-muted" data-i18n="billing.subtotal">Subtotal</span>
+              <span class="text-primary fw-600" id="bill-subtotal">₹0</span>
+            </div>
+            <div class="bill-item-row">
+              <span class="text-muted" data-i18n="billing.gst">GST (5%)</span>
+              <span class="text-secondary" id="bill-gst">₹0</span>
+            </div>
+            <div class="bill-total-row">
+              <span data-i18n="billing.total">Total</span>
+              <span style="font-size:22px;color:var(--accent-gold);" id="bill-total">₹0</span>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;display:flex;gap:10px;flex-direction:column;">
+            <button class="btn btn-emerald btn-lg w-full" onclick="completeSale()" data-i18n="billing.sell">✅ Maal Becha (Complete Sale)</button>
+            <button class="btn btn-ghost btn-lg w-full" onclick="clearBill()" data-i18n="billing.clear">🗑️ Clear Bill</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ STOCK MANAGER ═══════════ -->
+    <section id="section-stock" class="section-panel">
+      <div class="page-header flex-between">
+        <div>
+          <h2 class="page-title" data-i18n="stock.title">Stock Manager</h2>
+          <p class="page-subtitle" data-i18n="stock.subtitle">Manage Godown & Dukaan inventory</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openAddItemModal()" data-i18n="stock.add.item">+ Add New Item</button>
+          <button class="btn btn-ghost" onclick="openWastageModal()" data-i18n="stock.wastage.log">⚠️ Kharaab Maal</button>
+          <button class="btn btn-cyan"  onclick="openTransferModal()" data-i18n="stock.move">📦 Move to Dukaan</button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="btn btn-primary" id="filter-all"    onclick="setStockFilter('all')"   >All Items</button>
+        <button class="btn btn-ghost"   id="filter-godown" onclick="setStockFilter('godown')" data-i18n="stock.godown">Godown</button>
+        <button class="btn btn-ghost"   id="filter-dukaan" onclick="setStockFilter('dukaan')" data-i18n="stock.dukaan">Dukaan</button>
+        <button class="btn btn-ghost"   id="filter-low"    onclick="setStockFilter('low')"   >⚠️ Low Stock</button>
+      </div>
+
+      <!-- Search + Table -->
+      <div class="glass-card table-wrapper">
+        <div class="table-header">
+          <div class="search-bar" style="width:280px;">
+            <span class="search-icon">🔍</span>
+            <input class="input-glass" id="stock-search" type="text" placeholder="Search item, fabric, color..."
+              data-i18n-ph="stock.search" oninput="renderStockTable()"/>
+          </div>
+          <span class="badge badge-violet" id="stock-count-badge">0 items</span>
+        </div>
+        <div class="table-scroll">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th data-i18n="stock.col.item">Item Name</th>
+                <th data-i18n="stock.col.cat">Category</th>
+                <th data-i18n="stock.col.qty">Qty (Godown + Dukaan)</th>
+                <th data-i18n="stock.col.buy">Buy ₹</th>
+                <th data-i18n="stock.col.sell">Sell ₹</th>
+                <th data-i18n="stock.col.loc">Location</th>
+                <th data-i18n="stock.col.status">Status</th>
+                <th data-i18n="stock.col.action">Action</th>
+              </tr>
+            </thead>
+            <tbody id="stock-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SUPPLIER / VYAPAARI ═══════════ -->
+    <section id="section-supplier" class="section-panel">
+      <div class="page-header flex-between">
+        <div>
+          <h2 class="page-title" data-i18n="supplier.title">Vyapaari Hub</h2>
+          <p class="page-subtitle" data-i18n="supplier.subtitle">Manage suppliers and track incoming orders</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="openNewOrderModal()" data-i18n="supplier.new.order">📝 Khareedi Order</button>
+          <button class="btn btn-ghost" onclick="openAddSupplierModal()" data-i18n="supplier.add">+ Add Vyapaari</button>
+        </div>
+      </div>
+
+      <!-- Supplier Metric Cards -->
+      <div class="metrics-grid" id="supplier-metrics">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Vyapaari Directory -->
+      <div class="section-title" data-i18n="supplier.dir">Vyapaari Directory</div>
+      <div class="cards-grid" id="supplier-cards" style="margin-bottom:24px;"></div>
+
+      <!-- Order Pipeline -->
+      <div class="section-title" data-i18n="supplier.orders">Order Pipeline</div>
+      <div class="pipeline-container" id="order-pipeline">
+        <div class="glass-card pipeline-col">
+          <div class="pipeline-col-header pending">🟠 <span data-i18n="supplier.pending">Pending</span></div>
+          <div id="pipeline-pending"></div>
+        </div>
+        <div class="glass-card pipeline-col">
+          <div class="pipeline-col-header transit">🔵 <span data-i18n="supplier.transit">In Transit</span></div>
+          <div id="pipeline-transit"></div>
+        </div>
+        <div class="glass-card pipeline-col">
+          <div class="pipeline-col-header delivered">🟢 <span data-i18n="supplier.delivered">Delivered</span></div>
+          <div id="pipeline-delivered"></div>
+        </div>
+      </div>
+
+      <!-- Order History Charts -->
+      <div class="section-title" data-i18n="supplier.history">Order History & Spend Analysis</div>
+      <div class="charts-grid">
+        <div class="glass-card chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">📦 Order Value History</span>
+            <span class="badge badge-cyan">Last 10 orders</span>
+          </div>
+          <div class="chart-container" style="height:260px;">
+            <canvas id="chart-order-history"></canvas>
+          </div>
+        </div>
+        <div class="glass-card chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">💸 Spend by Vyapaari</span>
+            <span class="badge badge-gold">All time</span>
+          </div>
+          <div class="chart-container" style="height:260px;">
+            <canvas id="chart-supplier-spend"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ CALCULATORS ═══════════ -->
+    <section id="section-calculators" class="section-panel">
+      <div class="page-header">
+        <h2 class="page-title" data-i18n="calc.title">Hisab-Kitaab</h2>
+        <p class="page-subtitle" data-i18n="calc.subtitle">Smart tools for textile business decisions</p>
+      </div>
+
+      <div class="two-col" style="gap:20px;">
+
+        <!-- ── Calc 1: Kamaai ── -->
+        <div class="glass-card calc-card">
+          <div class="calc-title" data-i18n="calc.kamaai.title">💰 Kamaai Calculator</div>
+          <div class="calc-desc" data-i18n="calc.kamaai.desc">Find the right selling price for max profit</div>
+
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.kamaai.buy">Khareedi Daam (Buy Price) ₹</div>
+            <input class="input-glass" type="number" id="km-buy" placeholder="e.g. 500" min="0"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.kamaai.overhead">Transport/Overhead ₹</div>
+            <input class="input-glass" type="number" id="km-overhead" placeholder="e.g. 30" min="0"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label">
+              <span data-i18n="calc.kamaai.margin">Desired Kamaai (%)</span>
+              <strong class="text-gold" id="km-margin-label" style="margin-left:8px;">30%</strong>
+            </div>
+            <input type="range" class="range-slider" id="km-margin-slider" min="5" max="80" value="30" step="1"/>
+            <input class="input-glass" type="number" id="km-margin" value="30" min="5" max="80" style="margin-top:8px;"/>
+          </div>
+
+          <div class="calc-result">
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.kamaai.result.sell">Bikri Daam ₹</span>
+              <span class="calc-result-value big" id="km-res-sell">₹0</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.kamaai.result.profit">Net Profit ₹</span>
+              <span class="calc-result-value text-green" id="km-res-profit">₹0</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.kamaai.result.markup">Markup %</span>
+              <span class="calc-result-value" id="km-res-markup">0%</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.kamaai.result.gst">With GST (5%) ₹</span>
+              <span class="calc-result-value" id="km-res-gst">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Calc 2: GSM / Than ── -->
+        <div class="glass-card calc-card">
+          <div class="calc-title" data-i18n="calc.gsm.title">📏 Than Yield Calculator</div>
+          <div class="calc-desc" data-i18n="calc.gsm.desc">Convert fabric roll weight to estimated meters</div>
+
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.gsm.weight">Roll Weight (Kg)</div>
+            <input class="input-glass" type="number" id="gsm-weight" placeholder="e.g. 5.2" min="0" step="0.1"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.gsm.width">Fabric Width (cm)</div>
+            <input class="input-glass" type="number" id="gsm-width" placeholder="e.g. 110" min="1"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.gsm.gsm">GSM (g/m²)</div>
+            <input class="input-glass" type="number" id="gsm-gsm" placeholder="e.g. 120" min="1"/>
+          </div>
+
+          <div class="calc-result">
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.gsm.result">Estimated Length</span>
+              <span class="calc-result-value big text-cyan" id="gsm-res-meters">0 m</span>
+            </div>
+            <div style="padding:8px 0;font-size:11px;color:var(--text-muted)" id="gsm-res-hint">Enter all values to calculate</div>
+          </div>
+
+          <!-- Common GSM reference -->
+          <div style="margin-top:16px;padding:12px;background:rgba(6,182,212,0.06);border-radius:8px;border:1px solid rgba(6,182,212,0.15);">
+            <div class="calc-label mb-8" style="margin-bottom:8px;">Quick GSM Reference</div>
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.8;">
+              Cotton Lawn: 60-80 GSM &nbsp;|&nbsp; Cambric: 80-100 GSM<br/>
+              Poplin: 100-130 GSM &nbsp;|&nbsp; Linen: 130-200 GSM<br/>
+              Denim: 300-450 GSM &nbsp;|&nbsp; Silk: 40-100 GSM
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Calc 3: Mausam Predictor ── -->
+        <div class="glass-card calc-card">
+          <div class="calc-title" data-i18n="calc.season.title">🌸 Mausam Predictor</div>
+          <div class="calc-desc" data-i18n="calc.season.desc">Plan stock for the upcoming season</div>
+
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.season.sales">Last Month Sales (Units/Meters)</div>
+            <input class="input-glass" type="number" id="season-sales" placeholder="e.g. 150" min="0"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.season.season">Select Season / Festival</div>
+            <select class="input-glass" id="season-select"></select>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label">Safety Buffer (%)</div>
+            <input class="input-glass" type="number" id="season-safety" value="10" min="0" max="50" step="5"/>
+          </div>
+
+          <div class="calc-result">
+            <div class="calc-result-item">
+              <span class="calc-result-label">Season Change</span>
+              <span class="calc-result-value text-green" id="season-res-change">+0%</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label">Predicted Demand</span>
+              <span class="calc-result-value" id="season-res-predicted">0</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.season.result">Order This Much</span>
+              <span class="calc-result-value big text-gold" id="season-res-order">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Calc 4: Kharaab Maal ── -->
+        <div class="glass-card calc-card">
+          <div class="calc-title" data-i18n="calc.waste.title">⚠️ Kharaab Maal Calculator</div>
+          <div class="calc-desc" data-i18n="calc.waste.desc">Calculate profit loss from wastage</div>
+
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.waste.meters">Wasted Fabric (Meters)</div>
+            <input class="input-glass" type="number" id="waste-meters" placeholder="e.g. 4.5" min="0" step="0.5"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.waste.cost">Cost per Meter ₹</div>
+            <input class="input-glass" type="number" id="waste-cost" placeholder="e.g. 180" min="0"/>
+          </div>
+          <div class="calc-row">
+            <div class="calc-label" data-i18n="calc.waste.sales">Total Monthly Sales ₹</div>
+            <input class="input-glass" type="number" id="waste-sales" placeholder="e.g. 85000" min="0"/>
+          </div>
+
+          <!-- Gauge -->
+          <div id="waste-gauge" style="margin:16px 0;"></div>
+
+          <div class="calc-result">
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.waste.result.loss">Total Loss ₹</span>
+              <span class="calc-result-value big text-red" id="waste-res-loss">₹0</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label" data-i18n="calc.waste.result.pct">Loss % of Sales</span>
+              <span class="calc-result-value" id="waste-res-pct">0%</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label">Severity</span>
+              <span class="calc-result-value" id="waste-res-sev" style="font-size:12px;">-</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════ REPORTS ═══════════ -->
+    <section id="section-reports" class="section-panel">
+      <div class="page-header">
+        <h2 class="page-title" data-i18n="report.title">Reports & Analytics</h2>
+        <p class="page-subtitle" data-i18n="report.subtitle">Business performance insights</p>
+      </div>
+
+      <!-- Summary Metrics -->
+      <div class="metrics-grid" id="report-metrics"></div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="glass-card chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">📈 <span data-i18n="report.sales.trend">Sales vs Expense</span></span>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-sales-expense-report"></canvas>
+          </div>
+        </div>
+        <div class="glass-card chart-card">
+          <div class="chart-card-header">
+            <span class="chart-title">📊 <span data-i18n="report.profit.cat">Profit by Category</span></span>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-profit-bar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wastage Log Table -->
+      <div class="glass-card table-wrapper" style="margin-top:20px;">
+        <div class="table-header">
+          <span class="section-title mb-0">⚠️ Wastage Log (Kharaab Maal)</span>
+          <span class="badge badge-red" id="wastage-total-badge">₹0 total loss</span>
+        </div>
+        <div class="table-scroll">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th>Date</th><th>Item</th><th>Meters/Qty</th><th>Cost/m ₹</th><th>Total Loss ₹</th><th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="wastage-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- /#app-page -->
+
+</div><!-- /#app-root -->
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  MODALS                                         -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<!-- Add Stock Item Modal -->
+<div class="modal-overlay" id="modal-add-item">
+  <div class="glass-heavy modal-box">
+    <div class="flex-between mb-20">
+      <h3 class="fs-lg fw-700">➕ Add New Stock Item</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('modal-add-item')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Item Name</label>
+      <input class="input-glass" id="ni-name" placeholder="e.g. Banarasi Silk Saree - Red"/></div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Category</label>
+        <select class="input-glass" id="ni-cat">
+          <option>Saree</option><option>Fabric Than</option><option>Kurta</option>
+          <option>Kurti</option><option>Dhoti/Lungi</option><option>Dupatta</option>
+          <option>Dress Material</option><option>Accessories</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Unit</label>
+        <select class="input-glass" id="ni-unit"><option value="pcs">Pieces</option><option value="meters">Meters</option><option value="kg">Kg</option></select>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Godown Qty</label>
+        <input class="input-glass" id="ni-godown-qty" type="number" min="0" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Dukaan Qty</label>
+        <input class="input-glass" id="ni-dukaan-qty" type="number" min="0" placeholder="0"/></div>
+    </div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Buy Price ₹</label>
+        <input class="input-glass" id="ni-buy" type="number" min="0" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Sell Price ₹</label>
+        <input class="input-glass" id="ni-sell" type="number" min="0" placeholder="0"/></div>
+    </div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Location (Godown/Rack)</label>
+        <input class="input-glass" id="ni-location" placeholder="e.g. Godown-A/Rack-1"/></div>
+      <div class="form-group"><label class="form-label">Reorder Alert At (Qty)</label>
+        <input class="input-glass" id="ni-reorder" type="number" min="0" placeholder="5"/></div>
+    </div>
+    <button class="btn btn-primary btn-lg w-full" onclick="saveNewItem()" data-i18n="common.save">Save</button>
+  </div>
+</div>
+
+<!-- Wastage Modal -->
+<div class="modal-overlay" id="modal-wastage">
+  <div class="glass-heavy modal-box">
+    <div class="flex-between mb-20">
+      <h3 class="fs-lg fw-700">⚠️ Log Kharaab Maal (Wastage)</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('modal-wastage')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Select Item</label>
+      <select class="input-glass" id="waste-item-select"></select></div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Quantity / Meters Wasted</label>
+        <input class="input-glass" id="waste-qty-input" type="number" min="0" step="0.5" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Reason</label>
+        <input class="input-glass" id="waste-reason" placeholder="e.g. Soiled, torn"/></div>
+    </div>
+    <div class="form-group" id="waste-loss-preview" style="padding:12px;background:rgba(239,68,68,0.08);border-radius:10px;border:1px solid rgba(239,68,68,0.2);display:none;">
+      <span class="fs-sm text-muted">Estimated Loss: </span><span class="fw-700 text-red" id="waste-loss-est">₹0</span>
+    </div>
+    <button class="btn btn-danger btn-lg w-full" onclick="saveWastage()">Log Wastage (Maal Kharaab Hua)</button>
+  </div>
+</div>
+
+<!-- Stock Transfer Modal -->
+<div class="modal-overlay" id="modal-transfer">
+  <div class="glass-heavy modal-box">
+    <div class="flex-between mb-20">
+      <h3 class="fs-lg fw-700">📦 Godown → Dukaan Transfer</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('modal-transfer')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Select Item</label>
+      <select class="input-glass" id="transfer-item-select" onchange="updateTransferPreview()"></select></div>
+    <div id="transfer-preview" style="padding:12px;background:rgba(124,58,237,0.08);border-radius:10px;border:1px solid rgba(124,58,237,0.2);margin-bottom:16px;display:none;">
+      <div class="fs-sm text-muted">Godown Stock: <strong class="text-primary" id="tp-godown">0</strong></div>
+      <div class="fs-sm text-muted">Dukaan Stock: <strong class="text-cyan" id="tp-dukaan">0</strong></div>
+    </div>
+    <div class="form-group"><label class="form-label">Quantity to Transfer</label>
+      <input class="input-glass" id="transfer-qty" type="number" min="1" placeholder="0"/></div>
+    <button class="btn btn-cyan btn-lg w-full" onclick="saveTransfer()">Transfer to Dukaan</button>
+  </div>
+</div>
+
+<!-- New Order Modal -->
+<div class="modal-overlay" id="modal-new-order">
+  <div class="glass-heavy modal-box">
+    <div class="flex-between mb-20">
+      <h3 class="fs-lg fw-700">📝 New Khareedi Order</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('modal-new-order')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Select Vyapaari</label>
+      <select class="input-glass" id="order-supplier-select"></select></div>
+    <div class="form-group"><label class="form-label">Item Name</label>
+      <input class="input-glass" id="order-item-name" placeholder="e.g. Cotton Than - White"/></div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Quantity</label>
+        <input class="input-glass" id="order-qty" type="number" min="1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Unit</label>
+        <select class="input-glass" id="order-unit"><option value="pcs">Pieces</option><option value="meters">Meters</option><option value="kg">Kg</option></select>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Cost per Unit ₹</label>
+        <input class="input-glass" id="order-cost" type="number" min="0" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Expected Date</label>
+        <input class="input-glass" id="order-date" type="date"/></div>
+    </div>
+    <div class="form-group" id="order-total-preview" style="padding:12px;background:rgba(245,158,11,0.08);border-radius:10px;border:1px solid rgba(245,158,11,0.2);">
+      <span class="fs-sm text-muted">Total Order Cost: </span><span class="fw-700 text-gold" id="order-total-est">₹0</span>
+    </div>
+    <button class="btn btn-primary btn-lg w-full" onclick="saveNewOrder()">Place Khareedi Order</button>
+  </div>
+</div>
+
+<!-- Add Supplier Modal -->
+<div class="modal-overlay" id="modal-add-supplier">
+  <div class="glass-heavy modal-box">
+    <div class="flex-between mb-20">
+      <h3 class="fs-lg fw-700">🤝 Add New Vyapaari</h3>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('modal-add-supplier')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Vyapaari Name</label>
+      <input class="input-glass" id="ns-name" placeholder="e.g. Ramesh Fabrics"/></div>
+    <div class="form-group"><label class="form-label">City & State</label>
+      <input class="input-glass" id="ns-city" placeholder="e.g. Surat, Gujarat"/></div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">Phone / WhatsApp</label>
+        <input class="input-glass" id="ns-phone" type="tel" placeholder="9876543210"/></div>
+      <div class="form-group"><label class="form-label">Email</label>
+        <input class="input-glass" id="ns-email" type="email" placeholder="email@example.com"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Specialty (Fabric Types)</label>
+      <input class="input-glass" id="ns-specialty" placeholder="e.g. Silk & Synthetic Fabrics"/></div>
+    <div class="form-group"><label class="form-label">GSTIN (Optional)</label>
+      <input class="input-glass" id="ns-gstin" placeholder="e.g. 24ABCDE1234F1Z5"/></div>
+    <button class="btn btn-primary btn-lg w-full" onclick="saveNewSupplier()">Save Vyapaari</button>
+  </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  SCRIPTS (order matters)                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<script src="js/lang.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/calculators.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
