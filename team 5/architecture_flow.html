@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lakshmi Textile — Architecture & Data Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════ */
+/*  BASE STYLES (Match Presentation)               */
+/* ═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-base: #050814;
+  --primary: #7c3aed; --primary-light: #a78bfa; --primary-glow: rgba(124,58,237,0.35);
+  --cyan: #06b6d4; --cyan-glow: rgba(6,182,212,0.3);
+  --gold: #f59e0b; --gold-glow: rgba(245,158,11,0.3);
+  --emerald: #10b981; --emerald-glow: rgba(16,185,129,0.3);
+  --red: #ef4444;
+  --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #475569;
+  --glass-bg: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
+}
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--bg-base); color: var(--text-primary); }
+
+/* Background Animation */
+.bg-anim { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; animation: orbDrift 14s ease-in-out infinite; }
+.orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, #7c3aed, transparent); top: -250px; left: -200px; }
+.orb-2 { width: 600px; height: 600px; background: radial-gradient(circle, #06b6d4, transparent); top: 35%; right: -150px; animation-delay: 5s; }
+.orb-3 { width: 500px; height: 500px; background: radial-gradient(circle, #f59e0b, transparent); bottom: -150px; left: 25%; animation-delay: 9s; }
+@keyframes orbDrift { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -50px) scale(1.06); } 66% { transform: translate(-30px, 40px) scale(0.96); } }
+
+/* Slides */
+.slides-container { position: relative; z-index: 1; width: 100%; height: 100%; }
+.slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 60px 80px; opacity: 0; transform: translateX(60px); visibility: hidden; pointer-events: none; }
+.slide.active { opacity: 1; transform: translateX(0); visibility: visible; pointer-events: auto; }
+.slide-inner { width: 100%; max-width: 1300px; animation: fadeUp 0.7s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Typography */
+.slide-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 16px; border-radius: 50px; background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3); color: var(--primary-light); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 20px; }
+.slide-title { font-size: 42px; font-weight: 900; line-height: 1.1; background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; }
+.slide-subtitle { font-size: 18px; color: var(--text-secondary); font-weight: 400; line-height: 1.6; max-width: 800px; margin-bottom: 36px; }
+.glow-text { text-shadow: 0 0 20px var(--primary-glow), 0 0 40px rgba(124,58,237,0.15); }
+.section-num { font-size: 72px; font-weight: 900; color: rgba(124,58,237,0.08); position: absolute; top: 30px; right: 50px; line-height: 1; }
+
+/* ═══════════════════════════════════════════════ */
+/*  CUSTOM CSS FLOWCHART ENGINE                    */
+/* ═══════════════════════════════════════════════ */
+.diagram-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 100%; gap: 30px; margin-top: 20px;
+}
+.diagram-row {
+  display: flex; align-items: center; justify-content: center; gap: 40px; width: 100%;
+}
+.diagram-col {
+  display: flex; flex-direction: column; align-items: center; gap: 30px;
+}
+
+/* Nodes */
+.node {
+  background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border); border-radius: 16px;
+  padding: 20px 24px; min-width: 220px; text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); position: relative; z-index: 2;
+  transition: all 0.3s ease;
+}
+.node:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px var(--primary-glow); }
+.node-icon { font-size: 32px; margin-bottom: 12px; }
+.node-title { font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
+.node-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+/* DB Cylinder Node */
+.node-db { border-radius: 8px; border-color: var(--cyan); background: rgba(6,182,212,0.05); }
+.node-db::before, .node-db::after { content: ''; position: absolute; left: -1px; right: -1px; height: 16px; border: 1px solid var(--cyan); border-radius: 50%; background: inherit; }
+.node-db::before { top: -8px; border-bottom: none; }
+.node-db::after { bottom: -8px; border-top: none; }
+
+/* Role Node */
+.node-role { border-radius: 50px; border-color: var(--gold); padding: 12px 24px; min-width: 180px; }
+
+/* Connectors / Arrows */
+.connector-h { display: flex; align-items: center; position: relative; }
+.connector-v { display: flex; flex-direction: column; align-items: center; position: relative; }
+
+.line-h { height: 2px; width: 80px; background: linear-gradient(90deg, var(--primary), var(--cyan)); position: relative; }
+.line-v { width: 2px; height: 50px; background: linear-gradient(180deg, var(--primary), var(--cyan)); position: relative; }
+
+.line-h.dashed, .line-v.dashed { background: none; border: 1px dashed var(--primary-light); }
+.line-h.reverse { background: linear-gradient(90deg, var(--cyan), var(--primary)); }
+
+.arrow-right::after { content: '▶'; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: var(--cyan); font-size: 14px; }
+.arrow-left::before { content: '◀'; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 14px; }
+.arrow-down::after { content: '▼'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); color: var(--cyan); font-size: 14px; }
+
+.conn-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 700; color: var(--primary-light); white-space: nowrap; background: var(--bg-base); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(124,58,237,0.3); z-index: 3; }
+.connector-v .conn-label { top: 50%; left: 10px; transform: translateY(-50%); }
+
+/* Animated Data Particles */
+.particle-h { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff, 0 0 20px var(--cyan); top: -2px; left: 0; animation: moveH 2s linear infinite; }
+@keyframes moveH { to { left: 100%; } }
+.particle-v { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff, 0 0 20px var(--cyan); left: -2px; top: 0; animation: moveV 2s linear infinite; }
+@keyframes moveV { to { top: 100%; } }
+
+/* Layout grids */
+.split-slide { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.glass-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 24px; }
+
+/* Nav */
+.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; background: rgba(5,8,20,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--glass-border); }
+.nav-brand { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.nav-center { display: flex; align-items: center; gap: 16px; }
+.nav-btn { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.nav-btn:hover { background: rgba(124,58,237,0.2); border-color: var(--primary-light); }
+.slide-counter { font-size: 13px; font-weight: 600; color: var(--text-muted); min-width: 60px; text-align: center; }
+.slide-counter .current { color: var(--primary-light); font-size: 18px; font-weight: 800; }
+.progress-track { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.06); z-index: 100; }
+.progress-fill { height: 100%; background: linear-gradient(to right, var(--primary), var(--cyan)); transition: width 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div class="bg-anim">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+
+<div class="slides-container" id="slidesContainer">
+
+<!-- ────── SLIDE 1: TITLE ────── -->
+<div class="slide active" data-slide="0">
+  <div class="slide-inner" style="text-align: center; flex-direction: column;">
+    <div class="slide-tag">Systems Engineering</div>
+    <h1 class="slide-title glow-text" style="font-size:64px;">Architecture &amp; Data Flow</h1>
+    <p class="slide-subtitle" style="margin: 0 auto 40px; max-width: 700px; text-align: center;">
+      A comprehensive breakdown of how data moves through the Lakshmi Textile application, aligning business operations with offline-first technical solutions.
+    </p>
+    
+    <div class="diagram-container">
+      <div class="diagram-row">
+        <div class="node node-role" style="border-color:var(--primary);"><div class="node-title">👥 User Workflows</div></div>
+        <div class="connector-h"><div class="line-h arrow-right"><div class="particle-h"></div></div></div>
+        <div class="node" style="border-color:var(--cyan); padding: 12px 24px;"><div class="node-title">⚙️ App Logic</div></div>
+        <div class="connector-h"><div class="line-h arrow-right"><div class="particle-h"></div></div></div>
+        <div class="node node-db" style="border-color:var(--gold);"><div class="node-title">💾 LocalStorage</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 2: BIZ VS TECH ALIGNMENT ────── -->
+<div class="slide" data-slide="1">
+  <div class="slide-inner">
+    <span class="section-num">01</span>
+    <div class="slide-tag">🎯 Alignment</div>
+    <h2 class="slide-title">Business Needs → Tech Solutions</h2>
+    <p class="slide-subtitle">Mapping the core frustrations of Lakshmi Textile directly to our architectural decisions.</p>
+
+    <div class="diagram-container">
+      <div class="diagram-row">
+        <div class="diagram-col">
+          <div class="node" style="border-color:var(--red);">
+            <div class="node-title">No Internet Reliability</div>
+            <div class="node-desc">Shop experiences frequent internet drops</div>
+          </div>
+          <div class="node" style="border-color:var(--red);">
+            <div class="node-title">Untracked Wastage</div>
+            <div class="node-desc">Damaged goods eating into profit margins</div>
+          </div>
+          <div class="node" style="border-color:var(--red);">
+            <div class="node-title">Mixed Inventories</div>
+            <div class="node-desc">Warehouse stock mixed with Shop floor stock</div>
+          </div>
+        </div>
+
+        <div class="diagram-col">
+          <div class="connector-h"><div class="line-h arrow-right" style="width:120px;"><div class="conn-label">Solved by</div><div class="particle-h"></div></div></div>
+          <div class="connector-h"><div class="line-h arrow-right" style="width:120px;"><div class="conn-label">Solved by</div><div class="particle-h"></div></div></div>
+          <div class="connector-h"><div class="line-h arrow-right" style="width:120px;"><div class="conn-label">Solved by</div><div class="particle-h"></div></div></div>
+        </div>
+
+        <div class="diagram-col">
+          <div class="node" style="border-color:var(--emerald);">
+            <div class="node-title">Offline-First LocalStorage DB</div>
+            <div class="node-desc">All data persists locally in the browser</div>
+          </div>
+          <div class="node" style="border-color:var(--emerald);">
+            <div class="node-title">Kharaab Maal Tracker API</div>
+            <div class="node-desc">Isolated logging that ties directly to Sales DB</div>
+          </div>
+          <div class="node" style="border-color:var(--emerald);">
+            <div class="node-title">Split Godown/Dukaan Schema</div>
+            <div class="node-desc">Separate quantity columns in the core Stock DB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 3: HIGH LEVEL DB ────── -->
+<div class="slide" data-slide="2">
+  <div class="slide-inner">
+    <span class="section-num">02</span>
+    <div class="slide-tag">💾 Architecture</div>
+    <h2 class="slide-title">Offline Database Schema</h2>
+    <p class="slide-subtitle">The browser's LocalStorage API acts as a serverless relational database containing 5 core collections.</p>
+
+    <div class="diagram-container" style="background:rgba(255,255,255,0.02); padding: 40px; border-radius: 20px; border: 1px dashed var(--glass-border);">
+      <div class="diagram-row">
+        
+        <div class="node node-db">
+          <div class="node-icon">🤝</div>
+          <div class="node-title">Vyapaari DB</div>
+          <div class="node-desc">id, name, city, phone<br/>specialty, gstin</div>
+        </div>
+        
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">1 : Many</div><div class="particle-h"></div></div></div>
+
+        <div class="node node-db" style="border-color:var(--primary-light);">
+          <div class="node-icon">🚚</div>
+          <div class="node-title">Orders DB</div>
+          <div class="node-desc">id, supplierId, item, qty<br/>status (pending/transit)</div>
+        </div>
+
+      </div>
+      
+      <div class="diagram-row">
+        <div class="connector-v" style="margin-left: 280px;"><div class="line-v arrow-down"><div class="conn-label">Updates</div><div class="particle-v"></div></div></div>
+      </div>
+
+      <div class="diagram-row">
+        
+        <div class="node node-db" style="border-color:var(--gold); transform:scale(1.1); box-shadow: 0 0 30px var(--gold-glow);">
+          <div class="node-icon">📦</div>
+          <div class="node-title">Core Stock DB</div>
+          <div class="node-desc">id, name, category, unit<br/><strong style="color:var(--gold)">inGodown, inDukaan</strong><br/>buyPrice, sellPrice</div>
+        </div>
+
+      </div>
+
+      <div class="diagram-row">
+        <div class="connector-v"><div class="line-v arrow-down" style="height:40px;"><div class="conn-label">Reads/Deducts</div><div class="particle-v"></div></div></div>
+        <div class="connector-v" style="margin-left:220px;"><div class="line-v arrow-down" style="height:40px;"><div class="conn-label">Reads/Deducts</div><div class="particle-v"></div></div></div>
+      </div>
+
+      <div class="diagram-row">
+        <div class="node node-db" style="border-color:var(--emerald);">
+          <div class="node-icon">🛒</div>
+          <div class="node-title">Sales DB</div>
+          <div class="node-desc">id, items[], subtotal<br/>gst, total, date</div>
+        </div>
+
+        <div class="node node-db" style="border-color:var(--red);">
+          <div class="node-icon">⚠️</div>
+          <div class="node-title">Wastage DB</div>
+          <div class="node-desc">id, stockItemId, meters<br/>totalLoss, reason</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 4: SUPPLY CHAIN FLOW ────── -->
+<div class="slide" data-slide="3">
+  <div class="slide-inner">
+    <span class="section-num">03</span>
+    <div class="slide-tag">🚚 Workflow 1</div>
+    <h2 class="slide-title">Supply Chain Data Flow</h2>
+    <p class="slide-subtitle">How a low stock alert turns into a completed supplier order and physical stock.</p>
+
+    <div class="diagram-container">
+      
+      <div class="diagram-row">
+        <div class="node node-role" style="border-color:var(--primary);"><div class="node-icon">📦</div><div class="node-title">Godown Staff</div></div>
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">Creates</div><div class="particle-h"></div></div></div>
+        
+        <div class="node" style="border-color:var(--cyan);">
+          <div class="node-title">📝 Khareedi Order</div>
+          <div class="node-desc">Selects Vyapaari & enters qty</div>
+        </div>
+
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">WhatsApp</div><div class="particle-h"></div></div></div>
+        
+        <div class="node" style="border-color:var(--text-muted); border-style: dashed;">
+          <div class="node-icon">🤝</div>
+          <div class="node-title">External Vyapaari</div>
+          <div class="node-desc">Receives order via app link</div>
+        </div>
+      </div>
+
+      <div class="diagram-row" style="margin-top:-10px;">
+        <div style="width:200px;"></div>
+        <div class="connector-v"><div class="line-v arrow-down"><div class="conn-label">Saves</div><div class="particle-v"></div></div></div>
+        <div style="width:200px;"></div>
+      </div>
+
+      <div class="diagram-row">
+        <div class="node node-db"><div class="node-title">Orders DB</div><div class="node-desc">Status = "Pending"</div></div>
+        
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">"Maal Mila" Button</div><div class="particle-h"></div></div></div>
+        
+        <div class="node" style="border-color:var(--emerald);">
+          <div class="node-icon">✅</div>
+          <div class="node-title">Receive Stock</div>
+          <div class="node-desc">Triggered by staff upon delivery</div>
+        </div>
+        
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">Auto-Updates</div><div class="particle-h"></div></div></div>
+        
+        <div class="node node-db" style="border-color:var(--gold); box-shadow: 0 0 20px var(--gold-glow);">
+          <div class="node-title">Stock DB</div>
+          <div class="node-desc"><strong>+ Adds to Godown Qty</strong></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 5: INTERNAL TRANSFER FLOW ────── -->
+<div class="slide" data-slide="4">
+  <div class="slide-inner">
+    <span class="section-num">04</span>
+    <div class="slide-tag">📦 Workflow 2</div>
+    <h2 class="slide-title">Internal Transfer & Wastage</h2>
+    <p class="slide-subtitle">Handling the physical movement of fabric from the warehouse to the shop floor, and accounting for damage.</p>
+
+    <div class="split-slide">
+      <!-- Transfer Flow -->
+      <div class="glass-box">
+        <h3 style="color:var(--cyan); margin-bottom: 24px; text-align: center;">Move to Dukaan Flow</h3>
+        <div class="diagram-col">
+          <div class="node node-role" style="padding:10px;"><div class="node-title">Godown Staff</div></div>
+          <div class="connector-v"><div class="line-v arrow-down" style="height:30px;"><div class="conn-label">Initiates</div><div class="particle-v"></div></div></div>
+          <div class="node"><div class="node-title">Transfer Modal</div><div class="node-desc">Input transfer qty</div></div>
+          <div class="connector-v"><div class="line-v arrow-down" style="height:30px;"><div class="conn-label">Update DB</div><div class="particle-v"></div></div></div>
+          <div class="node node-db" style="border-color:var(--gold);">
+            <div class="node-title">Stock DB</div>
+            <div class="node-desc" style="color:var(--text-primary); font-weight:700;">
+              <span style="color:var(--red);">Godown Qty: -10m</span><br/>
+              <span style="color:var(--emerald);">Dukaan Qty: +10m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wastage Flow -->
+      <div class="glass-box">
+        <h3 style="color:var(--red); margin-bottom: 24px; text-align: center;">Kharaab Maal Flow</h3>
+        <div class="diagram-col">
+          <div class="node node-role" style="padding:10px;"><div class="node-title">Godown Staff</div></div>
+          <div class="connector-v"><div class="line-v arrow-down" style="height:30px;"><div class="conn-label">Logs</div><div class="particle-v"></div></div></div>
+          <div class="node"><div class="node-title">Wastage Form</div><div class="node-desc">Input damaged meters & reason</div></div>
+          
+          <div class="diagram-row" style="gap:20px; align-items:flex-start;">
+            <div class="diagram-col" style="gap:10px;">
+              <div class="connector-v"><div class="line-v arrow-down" style="height:30px;"><div class="particle-v"></div></div></div>
+              <div class="node node-db" style="border-color:var(--red); min-width:140px; padding:10px;">
+                <div class="node-title">Wastage DB</div>
+                <div class="node-desc">Record Loss ₹</div>
+              </div>
+            </div>
+            <div class="diagram-col" style="gap:10px;">
+              <div class="connector-v"><div class="line-v arrow-down" style="height:30px;"><div class="particle-v"></div></div></div>
+              <div class="node node-db" style="border-color:var(--gold); min-width:140px; padding:10px;">
+                <div class="node-title">Stock DB</div>
+                <div class="node-desc" style="color:var(--red);">- Deduct Qty</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ────── SLIDE 6: POS FLOW ────── -->
+<div class="slide" data-slide="5">
+  <div class="slide-inner">
+    <span class="section-num">05</span>
+    <div class="slide-tag">🛒 Workflow 3</div>
+    <h2 class="slide-title">Dukaan Point of Sale (Sales)</h2>
+    <p class="slide-subtitle">The data journey when a customer purchases an item at the shop counter.</p>
+
+    <div class="diagram-container">
+      
+      <div class="diagram-row">
+        <div class="node node-role" style="border-color:var(--primary);"><div class="node-icon">🏪</div><div class="node-title">Counter Staff</div></div>
+        
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">Selects</div><div class="particle-h"></div></div></div>
+        
+        <div class="node">
+          <div class="node-title">POS UI</div>
+          <div class="node-desc">Adds item & quantity to Bill</div>
+        </div>
+        
+        <div class="connector-h"><div class="line-h arrow-right reverse"><div class="conn-label">Validates Availability</div><div class="particle-h" style="animation: moveH reverse 1.5s linear infinite; left:auto; right:0;"></div></div></div>
+        
+        <div class="node node-db" style="border-color:var(--gold);">
+          <div class="node-title">Stock DB</div>
+          <div class="node-desc">Reads <strong style="color:var(--cyan);">Dukaan Qty</strong> & Sell Price</div>
+        </div>
+      </div>
+
+      <div class="diagram-row" style="margin-top: 10px;">
+        <div style="width:200px;"></div>
+        <div class="connector-v"><div class="line-v arrow-down"><div class="conn-label">"Complete Sale"</div><div class="particle-v"></div></div></div>
+        <div class="connector-v"><div class="line-v arrow-down" style="border:none;background:none;"></div></div>
+      </div>
+
+      <div class="diagram-row">
+        <div class="node" style="border-color:var(--emerald);">
+          <div class="node-icon">🧾</div>
+          <div class="node-title">Transaction Engine</div>
+          <div class="node-desc">Calculates Subtotal + 5% GST</div>
+        </div>
+
+        <div class="connector-h"><div class="line-h arrow-right"><div class="conn-label">1. Saves Record</div><div class="particle-h"></div></div></div>
+        
+        <div class="node node-db" style="border-color:var(--emerald); box-shadow: 0 0 20px var(--emerald-glow);">
+          <div class="node-title">Sales DB</div>
+          <div class="node-desc">+ New Receipt Data</div>
+        </div>
+      </div>
+
+      <div class="diagram-row" style="margin-top: -20px; position:relative;">
+        <div style="position:absolute; left: 34%; top: -30px;">
+          <div class="connector-h">
+             <!-- A curved arrow representing the stock deduction back to Stock DB -->
+             <div style="width: 250px; height: 70px; border-left: 2px solid var(--cyan); border-bottom: 2px solid var(--cyan); border-bottom-left-radius: 16px; position:relative; left: -50px; top:-50px;">
+                <div class="arrow-right" style="position:absolute; bottom:-1px; right:0;"></div>
+                <div class="conn-label" style="top: 100%; left: 50%; white-space:nowrap; background:var(--bg-base);">2. Deducts Dukaan Stock</div>
+                <div class="particle-h" style="top:auto; bottom:-2px;"></div>
+             </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ────── SLIDE 7: ANALYTICS FLOW ────── -->
+<div class="slide" data-slide="6">
+  <div class="slide-inner">
+    <span class="section-num">06</span>
+    <div class="slide-tag">📈 Workflow 4</div>
+    <h2 class="slide-title">Analytics & Decision Making</h2>
+    <p class="slide-subtitle">How raw data is aggregated into actionable insights for the business owner.</p>
+
+    <div class="diagram-container">
+      <div class="diagram-row">
+        
+        <div class="diagram-col" style="gap:15px; border-right: 1px dashed rgba(255,255,255,0.2); padding-right: 40px;">
+          <div class="node node-db" style="padding: 10px 20px; min-width: 150px;"><div class="node-title">Sales DB</div></div>
+          <div class="node node-db" style="border-color:var(--gold); padding: 10px 20px; min-width: 150px;"><div class="node-title">Stock DB</div></div>
+          <div class="node node-db" style="border-color:var(--primary-light); padding: 10px 20px; min-width: 150px;"><div class="node-title">Orders DB</div></div>
+          <div class="node node-db" style="border-color:var(--red); padding: 10px 20px; min-width: 150px;"><div class="node-title">Wastage DB</div></div>
+        </div>
+
+        <div class="connector-h"><div class="line-h arrow-right" style="width:100px;"><div class="conn-label">Aggregates</div><div class="particle-h"></div></div></div>
+
+        <div class="diagram-col">
+          <div class="node" style="border-color:var(--cyan); box-shadow: 0 0 30px var(--cyan-glow); padding: 30px;">
+            <div class="node-icon">📊</div>
+            <div class="node-title" style="font-size:24px;">Business Dashboard</div>
+            <div class="node-desc" style="margin-top:10px;">
+              Generates Chart.js visualizations,<br/>
+              calculates Net Profit, and<br/>
+              raises Low Stock Alerts.
+            </div>
+          </div>
+          
+          <div class="connector-v"><div class="line-v arrow-down" style="height:30px;"><div class="conn-label">Informs</div><div class="particle-v"></div></div></div>
+
+          <div class="node node-role" style="border-color:var(--gold);"><div class="node-icon">👑</div><div class="node-title" style="font-size:18px;">Malik (Owner)</div></div>
+        </div>
+
+        <div class="connector-h"><div class="line-h arrow-left reverse" style="width:100px;"><div class="conn-label">Inputs Data</div><div class="particle-h" style="animation: moveH reverse 2s linear infinite; left:auto; right:0;"></div></div></div>
+
+        <div class="node" style="border-color:var(--emerald);">
+          <div class="node-icon">🧮</div>
+          <div class="node-title">Textile Calculators</div>
+          <div class="node-desc" style="text-align:left; margin-top:10px;">
+            • <strong>Kamaai Calc:</strong> Sets optimal margins<br/>
+            • <strong>Mausam:</strong> Plans seasonal purchasing<br/>
+            • <strong>Than GSM:</strong> Verifies supplier quality
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides-container -->
+
+<!-- ─── NAVIGATION BAR ─── -->
+<div class="nav-bar">
+  <div class="nav-brand">🧵 Lakshmi Textile — Architecture Flow</div>
+  <div class="nav-center">
+    <button class="nav-btn" onclick="prevSlide()" title="Previous">◀</button>
+    <div class="slide-counter"><span class="current" id="slideNum">1</span> / <span id="totalSlides">7</span></div>
+    <button class="nav-btn" onclick="nextSlide()" title="Next">▶</button>
+  </div>
+  <div style="font-size:12px;color:var(--text-muted);">← → Arrow Keys to Navigate</div>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+document.getElementById('totalSlides').textContent = totalSlides;
+
+function goToSlide(n) {
+  if (n < 0 || n >= totalSlides || n === currentSlide) return;
+  const dir = n > currentSlide ? 1 : -1;
+  const oldSlide = currentSlide;
+  currentSlide = n;
+
+  // Setup entering slide
+  slides[currentSlide].style.transition = 'none';
+  slides[currentSlide].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+  slides[currentSlide].style.opacity = '0';
+  slides[currentSlide].style.visibility = 'hidden';
+  
+  void slides[currentSlide].offsetWidth; // Force reflow
+  
+  // Apply transitions
+  slides[oldSlide].style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+  slides[currentSlide].style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+  // Exit old slide
+  slides[oldSlide].classList.remove('active');
+  slides[oldSlide].style.transform = dir > 0 ? 'translateX(-60px)' : 'translateX(60px)';
+  slides[oldSlide].style.opacity = '0';
+  slides[oldSlide].style.visibility = 'hidden';
+
+  // Enter new slide
+  slides[currentSlide].classList.add('active');
+  slides[currentSlide].style.transform = 'translateX(0)';
+  slides[currentSlide].style.opacity = '1';
+  slides[currentSlide].style.visibility = 'visible';
+
+  // Update nav
+  document.getElementById('slideNum').textContent = currentSlide + 1;
+  document.getElementById('progress').style.width = ((currentSlide) / (totalSlides - 1)) * 100 + '%';
+}
+
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+  if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].screenX - touchStartX;
+  if (Math.abs(diff) > 60) { diff < 0 ? nextSlide() : prevSlide(); }
+});
+
+document.getElementById('progress').style.width = '0%';
+</script>
+
+</body>
+</html>
